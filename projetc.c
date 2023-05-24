@@ -15,9 +15,12 @@ typedef struct {
 
 //PROTOTYPES
 
+
+GrandEntier multiplication(GrandEntier a, GrandEntier b);
 GrandEntier soustraction(GrandEntier a, GrandEntier b);
 GrandEntier negative(GrandEntier a);
 GrandEntier soustraction_sans_signe(GrandEntier a, GrandEntier b);
+GrandEntier multiplication_base(GrandEntier a, GrandEntier b);
 int maximum(int a, int b);
 int egal_a(GrandEntier a, GrandEntier b);
 int different_de(GrandEntier a, GrandEntier b);
@@ -59,17 +62,20 @@ GrandEntier lecture_grand_entier(const char* str){
 
 void afficher_grand_entier(GrandEntier entier) {                // Afficher le signe du grand entier
 
-    if (entier.positif) {
+    int t = entier.taille - 1;
+    // enlever tous les 0 significatif
+    while (t > 0 && entier.digit[t] == 0){
+        t--;
+    }
+
+    if (entier.positif){
         printf("+");
     }
-    else {
+    else{
         printf("-");
-    }                                                           // Afficher le premier chiffre sans zéro de remplissage
-
-    printf("%d", entier.digit[entier.taille - 1]);
-                                                                // Afficher les chiffres restants du grand entier avec le zéro de remplissage appropri
-      
-    for (int i = entier.taille - 2; i >= 0; i--) {  
+    }
+          
+    for (int i = t; i >= 0; i--) {  
         printf("%d", entier.digit[i]);
     }
     printf("\n");
@@ -244,11 +250,49 @@ GrandEntier negative(GrandEntier a){
     return c;
 }
 
+GrandEntier multiplication_base(GrandEntier a, GrandEntier b){
+
+    GrandEntier m = {0};
+    m.positif = true;
+    m.taille = a.taille + b.taille;
+
+    int retenue = 0;
+
+    for (int i = 0; i < b.taille; i++) {
+        for (int j = 0; j < a.taille; j++) {
+            int produit = a.digit[j] * b.digit[i] + m.digit[i + j] + retenue;
+            m.digit[i + j] = produit % base;
+            retenue = produit / base;
+        }
+
+        if (retenue > 0) {
+            m.digit[i + a.taille] += retenue;
+            retenue = 0;
+        }
+    }
+
+    return m;
+}
+
+
+GrandEntier multiplication(GrandEntier a, GrandEntier b){
+
+    GrandEntier m = {0};
+
+    if((a.positif && b.positif) || (!a.positif && !b.positif)){
+        return multiplication_base(a, b);
+    }
+    else{
+        m = multiplication_base(a, b);
+        m.positif = false;
+        return m;
+    }
+}
 
 int main(){
 
-    GrandEntier a = lecture_grand_entier("1693476934");
-    GrandEntier b = lecture_grand_entier("-9000");
+    GrandEntier a = lecture_grand_entier("5235823");
+    GrandEntier b = lecture_grand_entier("4242424");
         
     
     printf("Premier entier : \n");
@@ -260,14 +304,16 @@ int main(){
     afficher_grand_entier(b);
 
     printf("______________________\n");
-    printf("addition : \n");
+    printf("Opération : \n");
     GrandEntier c = addition(a, b);
     afficher_grand_entier(c);
-
-    printf("______________________\n");
-    printf("soustraction : \n");
- //   soustraction(a, b);
     
+
+    printf("______________________\n\n");
+    printf("multiplication : \n");
+    afficher_grand_entier(multiplication(a,b));
+
+
     // printf("a inferieur à b :%d\n", inferieur_a(test, Test2));
 
     // printf("a inferieur ou egal à b :%d\n", inferieur_ou_egal_a(test, Test2));
