@@ -2,13 +2,13 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define base 10
-#define tailleMax 1000
+#define BASE 10
+#define TAILLEMAX 500
 
 
 
 typedef struct {
-    int digit[tailleMax];
+    int digit[TAILLEMAX];
     int taille;
     bool positif;
 } GrandEntier;
@@ -20,7 +20,6 @@ GrandEntier multiplication(GrandEntier a, GrandEntier b);
 GrandEntier soustraction(GrandEntier a, GrandEntier b);
 GrandEntier negative(GrandEntier a);
 GrandEntier soustraction_sans_signe(GrandEntier a, GrandEntier b);
-GrandEntier multiplication_base(GrandEntier a, GrandEntier b);
 int maximum(int a, int b);
 int egal_a(GrandEntier a, GrandEntier b);
 int different_de(GrandEntier a, GrandEntier b);
@@ -94,8 +93,8 @@ GrandEntier addition(GrandEntier a, GrandEntier b){
 
         for(int i = 0; i < n; i++){
             c.digit[i] = a.digit[i] + b.digit[i] + retenue;
-            if (c.digit[i] >= 10) {
-                c.digit[i] -= 10;
+            if (c.digit[i] >= BASE) {
+                c.digit[i] -= BASE;
                 retenue = 1;
             }
             else retenue = 0;
@@ -139,7 +138,7 @@ GrandEntier soustraction_sans_signe(GrandEntier a, GrandEntier b){
             c.digit[i] = b.digit[i] - a.digit[i] - retenue;
 
             if(c.digit[i] < 0){
-                c.digit[i] += 10;
+                c.digit[i] += BASE;
                 retenue = 1;
             }
             else retenue = 0;
@@ -151,7 +150,7 @@ GrandEntier soustraction_sans_signe(GrandEntier a, GrandEntier b){
             c.digit[i] = a.digit[i] - b.digit[i] - retenue;
          
             if(c.digit[i] < 0){
-                c.digit[i] += 10;
+                c.digit[i] += BASE;
                 retenue = 1;
             }
             else retenue = 0;
@@ -250,50 +249,93 @@ GrandEntier negative(GrandEntier a){
     return c;
 }
 
-GrandEntier multiplication_base(GrandEntier a, GrandEntier b){
+GrandEntier multiplication(GrandEntier a, GrandEntier b){
+    GrandEntier c = {0};
+    c.positif = (a.positif == b.positif);
 
-    GrandEntier m = {0};
-    m.positif = true;
-    m.taille = a.taille + b.taille;
-
+    c.taille = a.taille + b.taille - 1;
     int retenue = 0;
 
-    for (int i = 0; i < b.taille; i++) {
-        for (int j = 0; j < a.taille; j++) {
-            int produit = a.digit[j] * b.digit[i] + m.digit[i + j] + retenue;
-            m.digit[i + j] = produit % base;
-            retenue = produit / base;
-        }
-
-        if (retenue > 0) {
-            m.digit[i + a.taille] += retenue;
-            retenue = 0;
+    for(int k = 0; k < c.taille; k++){
+        c.digit[k] = retenue;
+        retenue = 0;
+        for(int i = 0; i <= k;i++){
+            int j = k - i;
+            c.digit[k] += a.digit[i] * b.digit[j];
+            if(c.digit[k] >= BASE){
+                retenue += c.digit[k] / BASE;
+                c.digit[k] = c.digit[k] % BASE;
+            }
         }
     }
 
-    return m;
+    if(retenue > 0){
+        c.taille += 1;
+        c.digit[c.taille - 1] = retenue;
+    }
+
+    return c;
 }
 
+GrandEntier puissance(GrandEntier a, int b){
+    
+    memmove(a.digit + b, a.digit, a.taille * sizeof(int));
+    memset(a.digit, 0, b * sizeof(int));
 
-GrandEntier multiplication(GrandEntier a, GrandEntier b){
+    a.taille = a.taille + b;
 
-    GrandEntier m = {0};
-
-    if((a.positif && b.positif) || (!a.positif && !b.positif)){
-        return multiplication_base(a, b);
-    }
-    else{
-        m = multiplication_base(a, b);
-        m.positif = false;
-        return m;
-    }
+    return a;
 }
+
+void partage(GrandEntier u, GrandEntier *pGauche, GrandEntier *pDroite, int m){
+    pGauche->positif = true;
+    pDroite->positif = true;
+    pGauche->taille = u.taille - m;
+    pDroite->taille = m;
+
+    memcpy(pGauche->digit, u.digit + m, pGauche->taille * sizeof(int));
+    memcpy(pDroite->digit, u.digit, pDroite->taille * sizeof(int));
+}
+
+GrandEntier karatsuba(GrandEntier u, GrandEntier v){
+    GrandEntier a = {0};
+    GrandEntier b = {0};
+    GrandEntier c = {0};  
+    GrandEntier d = {0};   
+
+    int n = maximum(u.taille, v.taille);
+    if(n==1){
+        return multiplication(u,v);
+    }
+
+    int k = n /2;
+
+    u.taille = n;
+    v.taille = n;
+
+    partage(u, &a, &b, n/2);
+    partage(v, &c, &d, n/2);
+
+    GrandEntier x = karatsuba(addition(a,b), addition(c,d)) ;
+    GrandEntier y = multiplication(a,c);
+    GrandEntier z = multiplication(b,d);
+    GrandEntier r = {0};
+
+    r = puissance(y, 2 * k);
+    r = addition(r, puissance(soustraction(x, addition(y,z)), k));
+    r = addition(r,z);
+
+    return r;
+}
+
 
 int main(){
 
-    GrandEntier a = lecture_grand_entier("5235823");
-    GrandEntier b = lecture_grand_entier("4242424");
-        
+    GrandEntier a = lecture_grand_entier("9999");
+    GrandEntier b = lecture_grand_entier("99");
+
+    GrandEntier c = {0};
+    GrandEntier d = {0};
     
     printf("Premier entier : \n");
     afficher_grand_entier(a);
@@ -303,17 +345,30 @@ int main(){
     printf("Deuxième entier : \n");
     afficher_grand_entier(b);
 
-    printf("______________________\n");
+    /* printf("______________________\n");
     printf("Opération : \n");
     GrandEntier c = addition(a, b);
-    afficher_grand_entier(c);
+    afficher_grand_entier(c); */
     
 
     printf("______________________\n\n");
     printf("multiplication : \n");
+
+
     afficher_grand_entier(multiplication(a,b));
 
+    /* printf("puissance : \n");
+    afficher_grand_entier(puissance(a,3)); */
 
+    printf("partage : \n");
+    partage(a, &c, &d, 2);
+    afficher_grand_entier(c);
+    afficher_grand_entier(d);
+
+    printf("_______________\n\n");
+    printf("Multiplication de Karatsuba \n");
+    afficher_grand_entier(karatsuba(a,b));
+    
     // printf("a inferieur à b :%d\n", inferieur_a(test, Test2));
 
     // printf("a inferieur ou egal à b :%d\n", inferieur_ou_egal_a(test, Test2));
