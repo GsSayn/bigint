@@ -3,7 +3,7 @@
 #include <string.h>
 
 #define BASE 10
-#define TAILLEMAX 500
+#define TAILLEMAX 1000
 
 
 
@@ -79,6 +79,16 @@ void afficher_grand_entier(GrandEntier entier) {                // Afficher le s
     }
     printf("\n");
 }
+
+void normaliser(GrandEntier *p){
+    for(int i = p->taille - 1; i >= 1; i--){
+        if(p->digit[i] != 0){
+            break;
+        }
+        p->taille--;
+    }
+}
+
 
 GrandEntier addition(GrandEntier a, GrandEntier b){
 
@@ -156,6 +166,8 @@ GrandEntier soustraction_sans_signe(GrandEntier a, GrandEntier b){
             else retenue = 0;
         }
     }
+
+    normaliser(&c);
     return c;
 }
 
@@ -329,48 +341,66 @@ GrandEntier karatsuba(GrandEntier u, GrandEntier v){
 }
 
 
+GrandEntier modulo(GrandEntier a, GrandEntier b){
+    GrandEntier r = {0};
+    r.positif = true;
+
+    if(egal_a(a,b) != 0){
+        r.taille = 1;
+        return r;
+    }
+    else if(inferieur_a(a,b) != 0){
+        return a;
+    }
+    
+    GrandEntier c = b;
+    
+    for(;;){
+        r = c;
+        c = addition(c,c);
+        if(inferieur_a(a,c) != 0){
+            break;
+        }
+    }
+    return modulo(soustraction(a,r),b);
+}
+
+
+GrandEntier expMod(GrandEntier g, unsigned int e, GrandEntier n){
+    int m = 1;
+    GrandEntier r0 = lecture_grand_entier("1");
+    GrandEntier r1 = g;
+
+    for(int i = 0; i < sizeof(e) * 8; i++){
+        if(e & m){
+            r0 = modulo(karatsuba(r0,r1), n);
+        }
+        r1 = modulo(karatsuba(r1,r1), n);
+        m*=2;
+        
+    }
+
+    return r0;
+}
+
+
+
+
 int main(){
 
-    GrandEntier a = lecture_grand_entier("9999");
-    GrandEntier b = lecture_grand_entier("99");
+    GrandEntier N = lecture_grand_entier("10000000000000000189723687123897624600000000000000130909344115489356213");
+    GrandEntier A1 = lecture_grand_entier("8686485663426759224407888859770678805723738354159785676572400332226014");
+    GrandEntier A2 = lecture_grand_entier("1114879505571279227970284372445165131110680858963525298678652733320689");
 
-    GrandEntier c = {0};
-    GrandEntier d = {0};
-    
+
     printf("Premier entier : \n");
-    afficher_grand_entier(a);
+    afficher_grand_entier(N);
 
-
-    
     printf("Deuxième entier : \n");
-    afficher_grand_entier(b);
-
-    /* printf("______________________\n");
-    printf("Opération : \n");
-    GrandEntier c = addition(a, b);
-    afficher_grand_entier(c); */
+    afficher_grand_entier(A1);
     
-
-    printf("______________________\n\n");
-    printf("multiplication : \n");
-
-
-    afficher_grand_entier(multiplication(a,b));
-
-    /* printf("puissance : \n");
-    afficher_grand_entier(puissance(a,3)); */
-
-    printf("partage : \n");
-    partage(a, &c, &d, 2);
-    afficher_grand_entier(c);
-    afficher_grand_entier(d);
-
-    printf("_______________\n\n");
-    printf("Multiplication de Karatsuba \n");
-    afficher_grand_entier(karatsuba(a,b));
-    
-    // printf("a inferieur à b :%d\n", inferieur_a(test, Test2));
-
-    // printf("a inferieur ou egal à b :%d\n", inferieur_ou_egal_a(test, Test2));
+    printf("expmod \n");
+    afficher_grand_entier(expMod(A1, 17, N));
+    afficher_grand_entier(expMod(A2, 1009, N));
 }
  
