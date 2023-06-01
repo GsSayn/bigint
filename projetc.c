@@ -2,10 +2,10 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define BASE 10
+#define BASE 10000
+#define FORMATDIGIT "%04d"
+
 #define TAILLEMAX 1000
-
-
 
 typedef struct {
     int digit[TAILLEMAX];
@@ -45,11 +45,23 @@ GrandEntier lecture_grand_entier(const char* str){
         }
 
         if (*p != 0) {
-                r.taille = strlen(p);
+                r.taille = 0;
+                int longueur = strlen(p);
+                int multiplicateur = 1;
 
-                for (int i = 0 ; i < r.taille ; i++) {
-                        r.digit[r.taille-1-i] = p[i] - '0';
+                for (int i = 0 ; i < longueur; i++){                      
+                        if(multiplicateur == 1){
+                            r.taille += 1;
+                        }
+                        
+                        r.digit[r.taille - 1] += (p[longueur - i - 1] - '0') * multiplicateur;
+                        
+                        multiplicateur *= 10;
+                        if(multiplicateur == BASE){
+                            multiplicateur = 1;
+                        }
                 }
+
         } else {
                 r.taille=1;
                 r.positif=true;
@@ -59,14 +71,14 @@ GrandEntier lecture_grand_entier(const char* str){
 }
 
 
-void afficher_grand_entier(GrandEntier entier) {                // Afficher le signe du grand entier
+void afficher_grand_entier(GrandEntier entier){
 
     int t = entier.taille - 1;
-    // enlever tous les 0 significatif
-    while (t > 0 && entier.digit[t] == 0){
+
+    while(t > 0 && entier.digit[t] == 0){
         t--;
     }
-
+    
     if (entier.positif){
         printf("+");
     }
@@ -74,10 +86,15 @@ void afficher_grand_entier(GrandEntier entier) {                // Afficher le s
         printf("-");
     }
           
-    for (int i = t; i >= 0; i--) {  
-        printf("%d", entier.digit[i]);
+    for (int i = t; i >= 0; i--) {
+        if (i == t) {
+            printf("%d", entier.digit[i]);
+        } else {
+            printf(FORMATDIGIT, entier.digit[i]);
+        } 
     }
     printf("\n");
+
 }
 
 void normaliser(GrandEntier *p){
@@ -383,15 +400,10 @@ GrandEntier expMod(GrandEntier g, unsigned int e, GrandEntier n){
     return r0;
 }
 
-
-
-
 int main(){
-
     GrandEntier N = lecture_grand_entier("10000000000000000189723687123897624600000000000000130909344115489356213");
     GrandEntier A1 = lecture_grand_entier("8686485663426759224407888859770678805723738354159785676572400332226014");
     GrandEntier A2 = lecture_grand_entier("1114879505571279227970284372445165131110680858963525298678652733320689");
-
 
     printf("Premier entier : \n");
     afficher_grand_entier(N);
