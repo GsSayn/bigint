@@ -389,7 +389,7 @@ GrandEntier expMod(GrandEntier g, unsigned int e, GrandEntier n){
     GrandEntier r1 = g;
 
     for(int i = 0; i < sizeof(e) * 8; i++){
-        if(e & m){
+        if(e & m){ // e & m différent de 0 si le bit de poids i est différent de 0
             r0 = modulo(karatsuba(r0,r1), n);
         }
         r1 = modulo(karatsuba(r1,r1), n);
