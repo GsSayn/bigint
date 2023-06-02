@@ -388,21 +388,32 @@ GrandEntier expMod(GrandEntier g, unsigned int e, GrandEntier n){
     GrandEntier r1 = g;
 
     for(int i = 0; i < sizeof(e) * 8; i++){
-        if(e & m){ // e & m différent de 0 si le bit de poids i est différent de 0
+        if(e % 2 == 1){ // e & m différent de 0 si le bit de poids i est différent de 0
             r0 = modulo(karatsuba(r0,r1), n);
         }
         r1 = modulo(karatsuba(r1,r1), n);
         m*=2;
-        
+        e = e / 2;
     }
 
     return r0;
+}
+
+GrandEntier cryptage(GrandEntier m, int e, GrandEntier N){
+    return expMod(m, e, N);
+}
+
+GrandEntier decryptage(GrandEntier c, int D, GrandEntier N){
+    return expMod(c, D, N);
 }
 
 int main(){
     GrandEntier N = lecture_grand_entier("10000000000000000189723687123897624600000000000000130909344115489356213");
     GrandEntier A1 = lecture_grand_entier("8686485663426759224407888859770678805723738354159785676572400332226014");
     GrandEntier A2 = lecture_grand_entier("1114879505571279227970284372445165131110680858963525298678652733320689");
+    GrandEntier z = lecture_grand_entier("99999");
+    GrandEntier PQ = lecture_grand_entier("1211809");
+
 
     printf("Premier entier : \n");
     afficher_grand_entier(N);
@@ -413,5 +424,19 @@ int main(){
     printf("expmod \n");
     afficher_grand_entier(expMod(A1, 17, N));
     afficher_grand_entier(expMod(A2, 1009, N));
+
+    printf("--------------\n");
+    afficher_grand_entier(z);
+    GrandEntier Parchemin = cryptage(z, 101, PQ);
+    afficher_grand_entier(Parchemin);
+    GrandEntier Bouteille = decryptage(Parchemin, 251501, PQ);
+    afficher_grand_entier(Bouteille);
+    
+    
+    
+
+
+
+
 }
  
