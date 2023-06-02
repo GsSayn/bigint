@@ -25,7 +25,6 @@ int egal_a(GrandEntier a, GrandEntier b);
 int different_de(GrandEntier a, GrandEntier b);
 int inferieur_a(GrandEntier a, GrandEntier b);
 int inferieur_ou_egal_a(GrandEntier a, GrandEntier b);
-void ordre(GrandEntier a, GrandEntier b, GrandEntier c);
 
 GrandEntier lecture_grand_entier(const char* str){
         GrandEntier r = {0};
