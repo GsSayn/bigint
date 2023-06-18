@@ -2,8 +2,8 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define BASE 10000
-#define FORMATDIGIT "%04d"
+#define BASE 10
+#define FORMATDIGIT "%01d"
 
 #define TAILLEMAX 1000
 
@@ -79,7 +79,7 @@ void afficher_grand_entier(GrandEntier entier){
     }
     
     if (entier.positif){
-        printf("+");
+        //printf("+");
     }
     else{
         printf("-");
@@ -383,7 +383,6 @@ GrandEntier modulo(GrandEntier a, GrandEntier b){
 
 
 GrandEntier expMod(GrandEntier g, unsigned int e, GrandEntier n){
-    int m = 1;
     GrandEntier r0 = lecture_grand_entier("1");
     GrandEntier r1 = g;
 
@@ -392,7 +391,6 @@ GrandEntier expMod(GrandEntier g, unsigned int e, GrandEntier n){
             r0 = modulo(karatsuba(r0,r1), n);
         }
         r1 = modulo(karatsuba(r1,r1), n);
-        m*=2;
         e = e / 2;
     }
 
@@ -407,50 +405,36 @@ GrandEntier decryptage(GrandEntier c, int D, GrandEntier N){
     return expMod(c, D, N);
 }
 
-int main(){
+int diviserPar2(GrandEntier* pE){
+    int retenue = 0;
+    for(int i = pE->taille - 1; i >= 0 ; i--){
+        int m = pE->digit[i] + retenue * BASE;
+        retenue = m % 2;
+        pE->digit[i] = m >> 1;
+    }
 
-    /*GrandEntier a = lecture_grand_entier("9999");
-    GrandEntier b = lecture_grand_entier("99");
+    return retenue;
+}
 
-    GrandEntier c = {0};
-    GrandEntier d = {0};
-    
-    printf("Premier entier : \n");
-    afficher_grand_entier(a);
+GrandEntier expModBigInt(GrandEntier g, GrandEntier e, GrandEntier n){
+    GrandEntier r0 = lecture_grand_entier("1");
+    GrandEntier r1 = g;
 
+    for(;;){
+        if(e.taille == 1 && e.digit[0] == 0){
+            break;
+        }
+        
+        int reste = diviserPar2(&e);
+        if(reste == 1){ 
+            r0 = modulo(karatsuba(r0,r1), n);
+        }
+        r1 = modulo(karatsuba(r1,r1), n);
+    }
+    return r0;
+}
 
-    
-    printf("Deuxième entier : \n");
-    afficher_grand_entier(b);
-
-    printf("______________________\n");
-    printf("Opération : \n");
-    GrandEntier c = addition(a, b);
-    afficher_grand_entier(c);
-    
-
-    printf("______________________\n\n");
-    printf("multiplication : \n");
-
-
-    afficher_grand_entier(multiplication(a,b));
-
-    printf("puissance : \n");
-    afficher_grand_entier(puissance(a,3)); 
-
-    printf("partage : \n");
-    partage(a, &c, &d, 2);
-    afficher_grand_entier(c);
-    afficher_grand_entier(d);
-
-    printf("_______________\n\n");
-    printf("Multiplication de Karatsuba \n");
-    afficher_grand_entier(karatsuba(a,b));
-    
-    printf("a inferieur à b :%d\n", inferieur_a(test, Test2));
-
-    printf("a inferieur ou egal à b :%d\n", inferieur_ou_egal_a(test, Test2));*/
-
+int main(){   
     GrandEntier A1 = lecture_grand_entier("99999999999999999999999999999999999999999999999999999999999999999999999999999999");
     printf("A1="); afficher_grand_entier(A1);
     GrandEntier B1 = lecture_grand_entier("1234567890123456789012345678901234567890");
@@ -525,22 +509,22 @@ int main(){
     printf("N="); afficher_grand_entier(N6);
     GrandEntier E6 = lecture_grand_entier("26491372460098638396330243727363668286317542677949618538027887477497099825349193306847666543548485163139087985459003998682524099556579043532908249083765604229295493584603683988172823034576084437663807");
     printf("E="); afficher_grand_entier(E6);
-    printf("2^EMODULON=XXX\n");  printf("\n");
+    printf("2^EMODULON="); afficher_grand_entier(expModBigInt(deux, E6, N6));  printf("\n");
 
     GrandEntier E7 = lecture_grand_entier("36491372460098638396330243727363668286317542677949618538027887477497099825349193306847666543548485163139087985459003998682524099556579043532908249083765604229295493584603683988172823034576084437663807");
     printf("E="); afficher_grand_entier(E7);
-    printf("2^EMODULON=XXX\n"); printf("\n");
+    printf("2^EMODULON="); afficher_grand_entier(expModBigInt(deux, E7, N6));  printf("\n");
 
     GrandEntier E8 = lecture_grand_entier("426491372460098638396330243727363668286317542677949618538027887477497099825349193306847666543548485163139087985459003998682524099556579043532908249083765604229295493584603683988172823034576084437663807");
     printf("E="); afficher_grand_entier(E8);
-    printf("2^EMODULON=XXX\n"); printf("\n");
+    printf("2^EMODULON="); afficher_grand_entier(expModBigInt(deux, E8, N6)); printf("\n");
 
     GrandEntier E9 = lecture_grand_entier("426491372460098638396330243727363668286317542677949618538027887477497099825349193306847666543548485163139087985459003998682524099556579043532908249083765604229295493584603683988172823034576084437663807");
     printf("E="); afficher_grand_entier(E9);
-    printf("2^EMODULON=XXX\n"); printf("\n");
+    printf("2^EMODULON=XXX\n"); afficher_grand_entier(expModBigInt(deux, E9, N6)); printf("\n");
 
     GrandEntier E10 = lecture_grand_entier("526491372460098638396330243727363668286317542677949618538027887477497099825349193306847666543548485163139087985459003998682524099556579043532908249083765604229295493584603683988172823034576084437663807");
     printf("E="); afficher_grand_entier(E10);
-    printf("2^EMODULON=XXX\n"); printf("\n");
+    printf("2^EMODULON="); afficher_grand_entier(expModBigInt(deux, E10, N6)); printf("\n");
 }
  
