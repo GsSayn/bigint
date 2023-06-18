@@ -2,8 +2,8 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define BASE 10
-#define FORMATDIGIT "%01d"
+#define BASE 10000
+#define FORMATDIGIT "%04d"
 
 #define TAILLEMAX 1000
 
@@ -421,11 +421,15 @@ GrandEntier expModBigInt(GrandEntier g, GrandEntier e, GrandEntier n){
     GrandEntier r1 = g;
 
     for(;;){
+        printf("%d => ", e.taille); afficher_grand_entier(e);
         if(e.taille == 1 && e.digit[0] == 0){
             break;
         }
         
         int reste = diviserPar2(&e);
+
+        normaliser(&e);
+
         if(reste == 1){ 
             r0 = modulo(karatsuba(r0,r1), n);
         }
@@ -521,7 +525,7 @@ int main(){
 
     GrandEntier E9 = lecture_grand_entier("426491372460098638396330243727363668286317542677949618538027887477497099825349193306847666543548485163139087985459003998682524099556579043532908249083765604229295493584603683988172823034576084437663807");
     printf("E="); afficher_grand_entier(E9);
-    printf("2^EMODULON=XXX\n"); afficher_grand_entier(expModBigInt(deux, E9, N6)); printf("\n");
+    printf("2^EMODULON="); afficher_grand_entier(expModBigInt(deux, E9, N6)); printf("\n");
 
     GrandEntier E10 = lecture_grand_entier("526491372460098638396330243727363668286317542677949618538027887477497099825349193306847666543548485163139087985459003998682524099556579043532908249083765604229295493584603683988172823034576084437663807");
     printf("E="); afficher_grand_entier(E10);
